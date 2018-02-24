@@ -1,0 +1,32 @@
+-  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- package:
+    name: apt-transport-https
+    state: present
+
+- apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/5.x/apt stable main
+    state: present
+
+- apt:
+    update_cache: true
+
+- package:
+    name: elasticsearch
+    state: present
+
+- name: enable elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+
+- name: change cluster.name
+  lineinfile:
+    line: 'cluster.name: {{cluster_name}}'
+    regexp: '^cluster.name'
+    insertafter: "^# cluster.name:"
+    dest: /etc/elasticsearch/elasticsearch.yml
+  tags: configure
+  notify: restart elasticsearch
